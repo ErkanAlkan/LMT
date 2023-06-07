@@ -1,0 +1,81 @@
+<%- include("header") -%>
+
+  <div class="container text-center">
+    <div class="row">
+      <div class="col">
+        <ul class="list-group">
+          <li class="list-group-item active centeredText">
+
+            <h2>Today's Quick List</h2>
+          </li>
+          <li class="list-group-item ">
+            Welcome to Today's Quick List
+          </li>
+          <li class="list-group-item">
+            To add a new Item, fill the form and hit the "ADD" button
+          </li>
+          <li class="list-group-item">
+            To delete an item, hit the bin image at the right of the items.
+          </li>
+          <form action="/delete" method="post">
+
+            <% for (let i=0 ; i<deneme.length; i++) {%>
+              <li class="list-group-item ">
+                <div class="">
+                  <%= deneme[i] %>
+                    <button type="submit" class="btn" name="deleteItems" value="<%= [i] %>"><i
+                        class="fa fa-trash"></i></button>
+                </div>
+              </li>
+              <%};%>
+          </form>
+
+
+
+          <li class="list-group-item ">
+            <form action="/additems" method="post">
+              <div class="row">
+                <div class="col">
+                  <input type="text" class="form-control input-lg" placeholder="Add New Item" name="newItem" autocomplete="off">
+                </div>
+                <div class="">
+                  <input class="btn btn-primary " type="submit" value="Add">
+                </div>
+              </div>
+            </form>
+          </li>
+        </ul>
+      </div>
+      <div class="col">
+        <ul class="list-group">
+          <li class="list-group-item active centeredText">
+            <h2>Existing Lists</h2>
+          </li>
+          <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+            Second checkbox
+          </li>
+          <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+            Third checkbox
+          </li>
+          <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+            Fourth checkbox
+          </li>
+          <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+            Fifth checkbox
+          </li>
+        </ul>
+      </div>
+      <div class="w-100"></div>
+    </div>
+  </div>
+
+
+
+
+
+
+  <%- include("footer") -%>

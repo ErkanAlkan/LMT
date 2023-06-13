@@ -1,5 +1,3 @@
-//jshint esversion:6
-
 const express = require("express");
 const mongoose = require("mongoose");
 const _ = require("lodash");
@@ -12,174 +10,155 @@ app.use(express.static("public"));
 
 mongoose.connect('mongodb://127.0.0.1:27017/todolistDB');
 
-const itemsSchema = new mongoose.Schema({
-  name: String
-});
-
-const Item = new mongoose.model("Item", itemsSchema);
-
-const item1 = new Item({
-  name: "Welcome to your TO DO list!"
-});
-
-const item2 = new Item({
-  name: "Hit the + button on the right buttom corner to add a new item"
-});
-const item3 = new Item({
-  name: "<= Hit the checkbox to delete an item"
-});
-
-const defultItems = [item1, item2, item3];
-
 const listSchema = new mongoose.Schema({
   name: String,
-  items: []
+  items: [],
+  checkboxStatus: []
 });
 
 const List = mongoose.model("List", listSchema);
 
 
 const initialList = "Quick List"
-const list = new List({
-  name: initialList,
-  items: []
-});
-list.save();
+var selectedListName = initialList;
+var selectedListItems = [];
+var selectedListCheckboxes =[];
 
 
-
-
-
-// app.get("/", function (req, res) {
-
-//   Item.find({}).then(function (founditems) {
-//     if (founditems.length === 0) {
-//       Item.insertMany(defultItems).then(function () {
-//         console.log("Successfully saved defult items to DB");
-//       }).catch(function (err) {
-//         console.log(err);
-//       });
-//       res.redirect("/");
-//     } else {
-//       res.render("list", { listTitle: "Today", newListItems: founditems });
-//     }
-//   }).catch(function (err) {
-//     console.log(err);
-//   });
-// });
 
 app.get("/", function (req, res) {
   res.render("home");
 });
 
 app.get("/Todolists", function (req, res) {
-  List.findOne({ name: initialList }).then(function (foundList) {
-    const deneme = foundList.items;
-    res.render("list", { deneme: deneme });
+  List.find({}).select("_id").then(function (exist) {
+    if (exist.length === 0) {
+      const list = new List({
+        name: initialList,
+        items: [],
+        checkboxStatus: []
+      });
+      list.save();
+      selectedListName = initialList;
+      selectedListItems =[];
+      selectedListCheckboxes =[];
+    }
+  });
+  List.find({}).select("name").then(function (allLists) {
+    res.render("list", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes:selectedListCheckboxes });
   });
 });
 
 app.post("/additems", function (req, res) {
-  const newItem = req.body.newItem;
-  List.findOne({ name: initialList }).then(function (foundList) {
-    foundList.items.push(newItem);
-    foundList.save();
-
+  const newItem = _.capitalize(req.body.newItem);
+  var sameItem = "false";
+  
+  if (selectedListName === "Please Choose or Create a List"){
+    console.log("Cannot add Items , please choose or Create a List");
     res.redirect("/Todolists");
-  });
+  }else {
+    List.findOne({ name: selectedListName }).then(function (foundList) {
+      for (let i = 0; i<foundList.items.length; i++){
+        if (newItem === foundList.items[i]){
+          sameItem = "true"
+        }
+      }
+      if (sameItem === "false"){
+        foundList.items.push(newItem);
+        foundList.checkboxStatus.push("notChecked");
+        foundList.save();
+        selectedListItems=foundList.items;
+        selectedListCheckboxes=foundList.checkboxStatus;
+        res.redirect("/Todolists");
+      } else{
+        List.find({}).select("name").then(function (allLists) {
+          res.render("sameitem", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes:selectedListCheckboxes });
+        });
+      }
+    });
+  }
 });
 
-app.post("/delete" , function(req,res){
+app.post("/deleteItems", function (req, res) {
   const deleteItems = req.body.deleteItems;
-  List.findOne({name: initialList}).then(function(foundList){
+  List.findOne({ name: selectedListName }).then(function (foundList) {
     foundList.items.splice(deleteItems, 1);
+    foundList.checkboxStatus.splice(deleteItems, 1);
     foundList.save();
+    selectedListItems=foundList.items;
+    selectedListCheckboxes=foundList.checkboxStatus;
   });
   res.redirect("/Todolists");
-})
+});
+
+app.post("/checkboxClick" ,function(req,res) {
+ var clickedBox = req.body.checkboxStatus;
+ List.findOne({ name: selectedListName }).then(function (foundList) {
+  if(foundList.checkboxStatus[clickedBox] === "notChecked") {
+    foundList.checkboxStatus[clickedBox] = "checked"
+    foundList.save();
+    selectedListCheckboxes = foundList.checkboxStatus;
+  } else {
+    foundList.checkboxStatus[clickedBox] = "notChecked"
+    foundList.save();
+    selectedListCheckboxes = foundList.checkboxStatus;
+  }
+ });
+ res.redirect("/Todolists");
+});
+
+app.post("/deleteLists", function(req,res) {
+  const deleteLists = req.body.deleteLists;
+  if (deleteLists===selectedListName){
+    selectedListName= "Please Choose or Create a List"
+    selectedListItems = [];
+    selectedListCheckboxes = [];
+  };
+  List.findOneAndDelete({name:deleteLists}).then(function(){
+    
+  });
+  res.redirect("/Todolists");
+});
 
 
-// app.get("/:customListName", function (req, res) {
-//   const customListName = _.capitalize([string = req.params.customListName]);
+app.post("/createNewList", function (req, res) {
+  const newListName = _.startCase(req.body.newListName);
+  if (newListName === ""){
+    res.send("<h1>List name can't be empty!");
+  }else {
+    List.findOne({ name: newListName }).then(function (foundList) {
+      if (!foundList) {
+        const newList = new List({
+          name: newListName,
+          items: [],
+          checkboxStatus: []
+        });
+        newList.save();
+        res.redirect("/Todolists");
+      } else {
+        List.find({}).select("name").then(function (allLists) {
+          res.render("sameitem", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes:selectedListCheckboxes });
+        });
+      }
+    });
+  }
+});
 
-//   List.findOne({ name: customListName }).then(function (foundList) {
-//     if (!foundList) {
-//       const list = new List({
-//         name: customListName,
-//         items: defultItems
-//       });
-//       list.save();
-//       res.redirect("/" + customListName);
-//     } else {
-//       res.render("list", { listTitle: customListName, newListItems: foundList.items });
-//     }
-//   }).catch(function (err) {
-//     console.log(err);
-//   });
-// });
-
-
-// app.post("/", function (req, res) {
-
-//   const itemName = req.body.newItem;
-//   const listName = req.body.list;
-//   const item = new Item({
-//     name: itemName
-//   });
-
-//   if (listName === "Today") {
-//     item.save();
-//     res.redirect("/")
-//   } else {
-//     List.findOne({ name: listName }).then(function (foundList) {
-//       foundList.items.push(item);
-//       foundList.save();
-//       res.redirect("/" + listName);
-//     });
-//   }
-// });
-
-// app.post("/delete", function (req, res) {
-//   const checkedItemId = req.body.checkbox;
-//   const listName = req.body.listName;
-
-//   if (listName === "Today") {
-//     Item.findByIdAndRemove(checkedItemId).then(function () {
-//       console.log("Successfully deleted" + checkedItemId + "from Today's list");
-//     }).catch(function (err) {
-//       console.log(err);
-//     });
-//     res.redirect("/");
-
-//   } else {
-// List.findOne({ name: listName }).then(function (foundList) {
-//   for (let i = 0; i < foundList.items.length; i++) {
-//     var stringed = JSON.stringify(foundList.items[i]._id);
-//     stringed = stringed.replace('"', '').replace('"', '');
-
-//     if (stringed === checkedItemId) {
-//       foundList.items.splice(i, 1);
-//       foundList.save();
-//       if (foundList.items.length === 0) {
-//         foundList.items.push(item1, item2, item3);
-//       }
-//     }
-//   }
-//   res.redirect("/" + listName);
-// });
-
-// List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } }).then(function () {
-//   List.findOne({ name: listName }).then(function (foundList) {
-//     if (foundList.items.length === 0) {
-//       foundList.items.push(item1, item2, item3);
-//       foundList.save();
-//     }
-//   });
-//   res.redirect("/" + listName);
-// });
-//   }
-// });
-
+app.post("/selectingList", function (req, res) {
+  selectedListName = req.body.selectedListNameButton;
+  List.findOne({ name: selectedListName }).then(function (foundList) {
+    if (!foundList) {
+      List.findOne({ name: initialList }).then(function (firstList) {
+        selectedListItems = firstList.items;
+        selectedListCheckboxes = firstList.checkboxStatus;
+      });
+    } else {
+      selectedListItems = foundList.items;
+      selectedListCheckboxes = foundList.checkboxStatus;
+    }
+  });
+  res.redirect("/Todolists");
+});
 
 
 app.listen(3000, function () {

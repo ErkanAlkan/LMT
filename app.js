@@ -241,6 +241,35 @@ app.get("/Meteorology", function (req, res) {
                 var iconDayThree = "https://openweathermap.org/img/wn/" + forecastData.list[myAdjustingNumber + 24].weather[0].icon + "@2x.png";
                 var iconDayFour = "https://openweathermap.org/img/wn/" + forecastData.list[myAdjustingNumber + 32].weather[0].icon + "@2x.png";
 
+
+
+
+                //Date arrangements for forecasted days
+                const currentDate = new Date()
+                const dayOneDate = new Date();
+                dayOneDate.setDate(currentDate.getDate() + 1);
+
+                const dayTwoDate = new Date();
+                dayTwoDate.setDate(currentDate.getDate() + 2);
+                const dayThreeDate = new Date();
+                dayThreeDate.setDate(currentDate.getDate() + 3);
+                const dayFourDate = new Date();
+                dayFourDate.setDate(currentDate.getDate() + 4);
+
+                const currentMonth = (currentDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+                const dayOneMonth = (dayOneDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+                const dayTwoMonth = (dayTwoDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+                const dayThreeMonth = (dayThreeDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+                const dayFourMonth = (dayFourDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+
+                var currentFinal = currentDate.getDate() + "/" + currentMonth;
+                var dayOneFinal = dayOneDate.getDate() + "/" + dayOneMonth;
+                var dayTwoFinal = dayTwoDate.getDate() + "/" + dayTwoMonth;
+                var dayThreeFinal = dayThreeDate.getDate() + "/" + dayThreeMonth;
+                var dayFourFinal = dayFourDate.getDate() + "/" + dayFourMonth;
+
+
+                //scrapping forecasted temperature data
                 var mondayTemp = [];
                 var tuesdayTemp = [];
                 var wednesdayTemp = [];
@@ -275,7 +304,6 @@ app.get("/Meteorology", function (req, res) {
                   }
                 }
 
-
                 const mondayMaxTemp = Math.max(...mondayTemp).toFixed(1);
                 const mondayMinTemp = Math.min(...mondayTemp).toFixed(1);
                 const tuesdayMaxTemp = Math.max(...tuesdayTemp).toFixed(1);
@@ -291,43 +319,11 @@ app.get("/Meteorology", function (req, res) {
                 const sundayMaxTemp = Math.max(...sundayTemp).toFixed(1);
                 const sundayMinTemp = Math.min(...sundayTemp).toFixed(1);
 
-                const currentDate = new Date()
-                const dayOneDate = new Date();
-                dayOneDate.setDate(currentDate.getDate() + 1);
-
-                const dayTwoDate = new Date();
-                dayTwoDate.setDate(currentDate.getDate() + 2);
-                const dayThreeDate = new Date();
-                dayThreeDate.setDate(currentDate.getDate() + 3);
-                const dayFourDate = new Date();
-                dayFourDate.setDate(currentDate.getDate() + 4);
-
-                const currentMonth = (currentDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
-                const dayOneMonth = (dayOneDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
-                const dayTwoMonth = (dayTwoDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
-                const dayThreeMonth = (dayThreeDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
-                const dayFourMonth = (dayFourDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
-
-                var currentFinal = currentDate.getDate() + "/" + currentMonth;
-                var dayOneFinal = dayOneDate.getDate() + "/" + dayOneMonth;
-                var dayTwoFinal = dayTwoDate.getDate() + "/" + dayTwoMonth;
-                var dayThreeFinal = dayThreeDate.getDate() + "/" + dayThreeMonth;
-                var dayFourFinal = dayFourDate.getDate() + "/" + dayFourMonth;
-
-
-
-                const todayWeekday = new Date().toLocaleString('en-us', { weekday: 'long' });
-                const todayDay = currentDate.getDate()
-                const todayMonth = currentDate.getMonth() + 1;
-
+                //setting min and max temps for following 4 days
                 var dayOne
                 var dayTwo
                 var dayThree
                 var dayFour
-                var dayOneNumbers = (todayDay + 1) + "/0" + todayMonth;
-                var dayTwoNumbers = (todayDay + 2) + "/0" + todayMonth;
-                var dayThreeNumbers = (todayDay + 3) + "/0" + todayMonth;
-                var dayFourNumbers = (todayDay + 4) + "/0" + todayMonth;
                 var dayOneMaxTemp
                 var dayOneMinTemp
                 var dayTwoMaxTemp
@@ -336,6 +332,7 @@ app.get("/Meteorology", function (req, res) {
                 var dayThreeMinTemp
                 var dayFourMaxTemp
                 var dayFourMinTemp
+                const todayWeekday = new Date().toLocaleString('en-us', { weekday: 'long' });
 
                 if (todayWeekday === "Sunday") {
                   dayOne = "Monday"
@@ -433,7 +430,7 @@ app.get("/Meteorology", function (req, res) {
               } catch (error) {
                 console.error("Error parsing JSON:", error);
               }
-              res.render("meteo", {currentFinal:currentFinal, dayFourFinal: dayFourFinal, dayThreeFinal: dayThreeFinal, dayTwoFinal: dayTwoFinal, dayOneFinal: dayOneFinal, dayFourNumbers: dayFourNumbers, dayThreeNumbers: dayThreeNumbers, dayTwoNumbers: dayTwoNumbers, dayOneNumbers: dayOneNumbers, dayFourMinTemp: dayFourMinTemp, dayFourMaxTemp: dayFourMaxTemp, dayThreeMinTemp: dayThreeMinTemp, dayThreeMaxTemp: dayThreeMaxTemp, dayTwoMinTemp: dayTwoMinTemp, dayTwoMaxTemp: dayTwoMaxTemp, dayOneMinTemp: dayOneMinTemp, dayOneMaxTemp: dayOneMaxTemp, cityQuery: cityQuery, weatherDescription: weatherDescription, temp: temp, weatherConditionUrl: weatherConditionUrl, dayOne: dayOne, dayTwo: dayTwo, dayThree: dayThree, dayFour: dayFour, iconDayOne: iconDayOne, iconDayTwo: iconDayTwo, iconDayThree: iconDayThree, iconDayFour: iconDayFour });
+              res.render("meteo", { currentFinal: currentFinal, dayFourFinal: dayFourFinal, dayThreeFinal: dayThreeFinal, dayTwoFinal: dayTwoFinal, dayOneFinal: dayOneFinal, dayFourMinTemp: dayFourMinTemp, dayFourMaxTemp: dayFourMaxTemp, dayThreeMinTemp: dayThreeMinTemp, dayThreeMaxTemp: dayThreeMaxTemp, dayTwoMinTemp: dayTwoMinTemp, dayTwoMaxTemp: dayTwoMaxTemp, dayOneMinTemp: dayOneMinTemp, dayOneMaxTemp: dayOneMaxTemp, cityQuery: cityQuery, weatherDescription: weatherDescription, temp: temp, weatherConditionUrl: weatherConditionUrl, dayOne: dayOne, dayTwo: dayTwo, dayThree: dayThree, dayFour: dayFour, iconDayOne: iconDayOne, iconDayTwo: iconDayTwo, iconDayThree: iconDayThree, iconDayFour: iconDayFour });
             });
           } else {
             res.send("There is a problem with the forecast data parsing");
@@ -450,22 +447,6 @@ app.get("/Meteorology", function (req, res) {
   });
 
 });
-
-// let unix_timestamp = 1686657600
-// // Create a new JavaScript Date object based on the timestamp
-// // multiplied by 1000 so that the argument is in milliseconds, not seconds.
-// var date = new Date(unix_timestamp * 1000);
-// // Hours part from the timestamp
-// var day = date.getDay();
-// var hours = date.getHours();
-// // Minutes part from the timestamp
-// var minutes = "0" + date.getMinutes();
-// // Seconds part from the timestamp
-// var seconds = "0" + date.getSeconds();
-
-// // Will display time in 10:30:23 format
-// var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
-
 
 
 app.post("/cityQuery", function (req, res) {

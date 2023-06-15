@@ -182,7 +182,7 @@ app.get("/Meteorology", function (req, res) {
     if (response.statusCode === 200) {
       response.on("data", function (data) {
         const weatherData = JSON.parse(data);
-        temp = weatherData.main.temp;
+        temp = weatherData.main.temp.toFixed(1);
         weatherDescription = weatherData.weather[0].description;
         icon = weatherData.weather[0].icon;
         weatherConditionUrl = "https://openweathermap.org/img/wn/" + icon + "@2x.png"
@@ -203,48 +203,247 @@ app.get("/Meteorology", function (req, res) {
             response.on("end", function () {
               try {
                 const forecastData = JSON.parse(data1);
-                var unixTimeDayOne = forecastData.list[0].dt;
-                var unixTimeDayTwo = forecastData.list[1].dt;
-                var unixTimeDayThree = forecastData.list[2].dt;
-                var unixTimeDayFour = forecastData.list[3].dt;
-                var unixTimeDayFive = forecastData.list[4].dt;
-                var minTempDayOne = forecastData.list[0].main.temp_min;
-                var minTempDayTwo = forecastData.list[1].main.temp_min;
-                var minTempDayThree = forecastData.list[2].main.temp_min;
-                var minTempDayFour = forecastData.list[3].main.temp_min;
-                var minTempDayFive = forecastData.list[4].main.temp_min;
-                var maxTempDayOne = forecastData.list[0].main.temp_max;
-                var maxTempDayTwo = forecastData.list[1].main.temp_max;
-                var maxTempDayThree = forecastData.list[2].main.temp_max;
-                var maxTempDayFour = forecastData.list[3].main.temp_max;
-                var maxTempDayFive = forecastData.list[4].main.temp_max;
-                var iconDayOne = forecastData.list[0].weather[0].icon;
-                var iconDayTwo = forecastData.list[1].weather[0].icon;
-                var iconDayThree = forecastData.list[2].weather[0].icon;
-                var iconDayFour = forecastData.list[3].weather[0].icon;
-                var iconDayFive = forecastData.list[4].weather[0].icon;
-                var dayOne = new Date(unixTimeDayOne * 1000).toLocaleString('en-us', { weekday: 'short' });
-                var dayTwo = new Date(unixTimeDayTwo * 1000).toLocaleString('en-us', { weekday: 'short' });
-                var dayThree = new Date(unixTimeDayThree * 1000).toLocaleString('en-us', { weekday: 'short' });
-                var dayFour = new Date(unixTimeDayFour * 1000).toLocaleString('en-us', { weekday: 'short' });
-                var dayFive = new Date(unixTimeDayFive * 1000).toLocaleString('en-us', { weekday: 'short' });
-                var tryOut= forecastData.list[0].dt_txt
-                console.log(tryOut);
-                
-                
+                var txtTime = forecastData.list[0].dt_txt;
+                var txtTimeNumber = Number(txtTime.substr(11, 2));
+                let myAdjustingNumber
+
+                switch (txtTimeNumber) {
+                  case 0:
+                    myAdjustingNumber = 5
+                    break;
+                  case 3:
+                    myAdjustingNumber = 4
+                    break;
+                  case 6:
+                    myAdjustingNumber = 3
+                    break;
+                  case 9:
+                    myAdjustingNumber = 2
+                    break;
+                  case 12:
+                    myAdjustingNumber = 1
+                    break;
+                  case 15:
+                    myAdjustingNumber = 0
+                    break;
+                  case 18:
+                    myAdjustingNumber = 7
+                    break;
+                  case 21:
+                    myAdjustingNumber = 6
+                    break;
+                }
+
+                //Getting weather icon at 15:00 UTC for each day
+
+                var iconDayOne = "https://openweathermap.org/img/wn/" + forecastData.list[myAdjustingNumber + 8].weather[0].icon + "@2x.png";
+                var iconDayTwo = "https://openweathermap.org/img/wn/" + forecastData.list[myAdjustingNumber + 16].weather[0].icon + "@2x.png";
+                var iconDayThree = "https://openweathermap.org/img/wn/" + forecastData.list[myAdjustingNumber + 24].weather[0].icon + "@2x.png";
+                var iconDayFour = "https://openweathermap.org/img/wn/" + forecastData.list[myAdjustingNumber + 32].weather[0].icon + "@2x.png";
+
+                var mondayTemp = [];
+                var tuesdayTemp = [];
+                var wednesdayTemp = [];
+                var thursdayTemp = [];
+                var fridayTemp = [];
+                var saturdayTemp = [];
+                var sundayTemp = [];
+
+                for (let i = 0; i < 40; i++) {
+                  var dayToCheck = forecastData.list[i].dt;
+                  if (new Date(dayToCheck * 1000).toLocaleString('en-us', { weekday: 'short' }) === "Mon") {
+                    mondayTemp.push(forecastData.list[i].main.temp_min);
+                    mondayTemp.push(forecastData.list[i].main.temp_max);
+                  } else if (new Date(dayToCheck * 1000).toLocaleString('en-us', { weekday: 'short' }) === "Tue") {
+                    tuesdayTemp.push(forecastData.list[i].main.temp_min);
+                    tuesdayTemp.push(forecastData.list[i].main.temp_max);
+                  } else if (new Date(dayToCheck * 1000).toLocaleString('en-us', { weekday: 'short' }) === "Wed") {
+                    wednesdayTemp.push(forecastData.list[i].main.temp_min);
+                    wednesdayTemp.push(forecastData.list[i].main.temp_max);
+                  } else if (new Date(dayToCheck * 1000).toLocaleString('en-us', { weekday: 'short' }) === "Thu") {
+                    thursdayTemp.push(forecastData.list[i].main.temp_min);
+                    thursdayTemp.push(forecastData.list[i].main.temp_max);
+                  } else if (new Date(dayToCheck * 1000).toLocaleString('en-us', { weekday: 'short' }) === "Fri") {
+                    fridayTemp.push(forecastData.list[i].main.temp_min);
+                    fridayTemp.push(forecastData.list[i].main.temp_max);
+                  } else if (new Date(dayToCheck * 1000).toLocaleString('en-us', { weekday: 'short' }) === "Sat") {
+                    saturdayTemp.push(forecastData.list[i].main.temp_min);
+                    saturdayTemp.push(forecastData.list[i].main.temp_max);
+                  } else if (new Date(dayToCheck * 1000).toLocaleString('en-us', { weekday: 'short' }) === "Sun") {
+                    sundayTemp.push(forecastData.list[i].main.temp_min);
+                    sundayTemp.push(forecastData.list[i].main.temp_max);
+                  }
+                }
+
+
+                const mondayMaxTemp = Math.max(...mondayTemp).toFixed(1);
+                const mondayMinTemp = Math.min(...mondayTemp).toFixed(1);
+                const tuesdayMaxTemp = Math.max(...tuesdayTemp).toFixed(1);
+                const tuesdayMinTemp = Math.min(...tuesdayTemp).toFixed(1);
+                const wednesdayMaxTemp = Math.max(...wednesdayTemp).toFixed(1);
+                const wednesdayMinTemp = Math.min(...wednesdayTemp).toFixed(1);
+                const thursdayMaxTemp = Math.max(...thursdayTemp).toFixed(1);
+                const thursdayMinTemp = Math.min(...thursdayTemp).toFixed(1);
+                const fridayMaxTemp = Math.max(...fridayTemp).toFixed(1);
+                const fridayMinTemp = Math.min(...fridayTemp).toFixed(1);
+                const saturdayMaxTemp = Math.max(...saturdayTemp).toFixed(1);
+                const saturdayMinTemp = Math.min(...saturdayTemp).toFixed(1);
+                const sundayMaxTemp = Math.max(...sundayTemp).toFixed(1);
+                const sundayMinTemp = Math.min(...sundayTemp).toFixed(1);
+
+                const currentDate = new Date()
+                const dayOneDate = new Date();
+                dayOneDate.setDate(currentDate.getDate() + 1);
+
+                const dayTwoDate = new Date();
+                dayTwoDate.setDate(currentDate.getDate() + 2);
+                const dayThreeDate = new Date();
+                dayThreeDate.setDate(currentDate.getDate() + 3);
+                const dayFourDate = new Date();
+                dayFourDate.setDate(currentDate.getDate() + 4);
+
+                const currentMonth = (currentDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+                const dayOneMonth = (dayOneDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+                const dayTwoMonth = (dayTwoDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+                const dayThreeMonth = (dayThreeDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+                const dayFourMonth = (dayFourDate.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+
+                var currentFinal = currentDate.getDate() + "/" + currentMonth;
+                var dayOneFinal = dayOneDate.getDate() + "/" + dayOneMonth;
+                var dayTwoFinal = dayTwoDate.getDate() + "/" + dayTwoMonth;
+                var dayThreeFinal = dayThreeDate.getDate() + "/" + dayThreeMonth;
+                var dayFourFinal = dayFourDate.getDate() + "/" + dayFourMonth;
+
+
+
+                const todayWeekday = new Date().toLocaleString('en-us', { weekday: 'long' });
+                const todayDay = currentDate.getDate()
+                const todayMonth = currentDate.getMonth() + 1;
+
+                var dayOne
+                var dayTwo
+                var dayThree
+                var dayFour
+                var dayOneNumbers = (todayDay + 1) + "/0" + todayMonth;
+                var dayTwoNumbers = (todayDay + 2) + "/0" + todayMonth;
+                var dayThreeNumbers = (todayDay + 3) + "/0" + todayMonth;
+                var dayFourNumbers = (todayDay + 4) + "/0" + todayMonth;
+                var dayOneMaxTemp
+                var dayOneMinTemp
+                var dayTwoMaxTemp
+                var dayTwoMinTemp
+                var dayThreeMaxTemp
+                var dayThreeMinTemp
+                var dayFourMaxTemp
+                var dayFourMinTemp
+
+                if (todayWeekday === "Sunday") {
+                  dayOne = "Monday"
+                  dayOneMaxTemp = mondayMaxTemp;
+                  dayOneMinTemp = mondayMinTemp;
+                  dayTwo = "Tuesday";
+                  dayTwoMaxTemp = tuesdayMaxTemp;
+                  dayTwoMinTemp = tuesdayMinTemp;
+                  dayThree = "Wednesday";
+                  dayThreeMaxTemp = wednesdayMaxTemp;
+                  dayThreeMinTemp = wednesdayMinTemp;
+                  dayFour = "Thursday";
+                  dayFourMaxTemp = thursdayMaxTemp;
+                  dayFourMinTemp = thursdayMinTemp;
+                } else if (todayWeekday === "Monday") {
+                  dayOne = "Tuesday"
+                  dayOneMaxTemp = tuesdayMaxTemp;
+                  dayOneMinTemp = tuesdayMinTemp;
+                  dayTwo = "Wednesday";
+                  dayTwoMaxTemp = wednesdayMaxTemp;
+                  dayTwoMinTemp = wednesdayMinTemp;
+                  dayThree = "Thursday";
+                  dayThreeMaxTemp = thursdayMaxTemp;
+                  dayThreeMinTemp = thursdayMinTemp;
+                  dayFour = "Friday";
+                  dayFourMaxTemp = fridayMaxTemp;
+                  dayFourMinTemp = fridayMinTemp;
+                } else if (todayWeekday === "Tuesday") {
+                  dayOne = "Wednesday"
+                  dayOneMaxTemp = wednesdayMaxTemp;
+                  dayOneMinTemp = wednesdayMinTemp;
+                  dayTwo = "Thursday";
+                  dayTwoMaxTemp = thursdayMaxTemp;
+                  dayTwoMinTemp = thursdayMinTemp;
+                  dayThree = "Friday";
+                  dayThreeMaxTemp = fridayMaxTemp;
+                  dayThreeMinTemp = fridayMinTemp;
+                  dayFour = "Saturday";
+                  dayFourMaxTemp = saturdayMaxTemp;
+                  dayFourMinTemp = saturdayMinTemp;
+                } else if (todayWeekday === "Wednesday") {
+                  dayOne = "Thursday"
+                  dayOneMaxTemp = thursdayMaxTemp;
+                  dayOneMinTemp = thursdayMinTemp;
+                  dayTwo = "Friday";
+                  dayTwoMaxTemp = fridayMaxTemp;
+                  dayTwoMinTemp = fridayMinTemp;
+                  dayThree = "Saturday";
+                  dayThreeMaxTemp = saturdayMaxTemp;
+                  dayThreeMinTemp = saturdayMinTemp;
+                  dayFour = "Sunday";
+                  dayFourMaxTemp = sundayMaxTemp;
+                  dayFourMinTemp = sundayMinTemp;
+                } else if (todayWeekday === "Thursday") {
+                  dayOne = "Friday"
+                  dayOneMaxTemp = fridayMaxTemp;
+                  dayOneMinTemp = fridayMinTemp;
+                  dayTwo = "Saturday";
+                  dayTwoMaxTemp = saturdayMaxTemp;
+                  dayTwoMinTemp = saturdayMinTemp;
+                  dayThree = "Sunday";
+                  dayThreeMaxTemp = sundayMaxTemp;
+                  dayThreeMinTemp = sundayMinTemp;
+                  dayFour = "Monday";
+                  dayFourMaxTemp = mondayMaxTemp;
+                  dayFourMinTemp = mondayMinTemp;
+                } else if (todayWeekday === "Friday") {
+                  dayOne = "Saturday"
+                  dayOneMaxTemp = saturdayMaxTemp;
+                  dayOneMinTemp = saturdayMinTemp;
+                  dayTwo = "Sunday";
+                  dayTwoMaxTemp = sundayMaxTemp;
+                  dayTwoMinTemp = sundayMinTemp;
+                  dayThree = "Monday";
+                  dayThreeMaxTemp = mondayMaxTemp;
+                  dayThreeMinTemp = mondayMinTemp;
+                  dayFour = "Tuesday";
+                  dayFourMaxTemp = tuesdayMaxTemp;
+                  dayFourMinTemp = tuesdayMinTemp;
+                } else if (todayWeekday === "Saturday") {
+                  dayOne = "Sunday"
+                  dayOneMaxTemp = sundayMaxTemp;
+                  dayOneMinTemp = sundayMinTemp;
+                  dayTwo = "Monday";
+                  dayTwoMaxTemp = mondayMaxTemp;
+                  dayTwoMinTemp = mondayMinTemp;
+                  dayThree = "Tuesday";
+                  dayThreeMaxTemp = tuesdayMaxTemp;
+                  dayThreeMinTemp = tuesdayMinTemp;
+                  dayFour = "Wednesday";
+                  dayFourMaxTemp = wednesdayMaxTemp;
+                  dayFourMinTemp = wednesdayMinTemp;
+                }
+
               } catch (error) {
                 console.error("Error parsing JSON:", error);
               }
-              res.render("meteo", { cityQuery: cityQuery, weatherDescription: weatherDescription, temp: temp, weatherConditionUrl: weatherConditionUrl, dayOne: dayOne, dayTwo: dayTwo, dayThree: dayThree, dayFour: dayFour, dayFive: dayFive });
+              res.render("meteo", {currentFinal:currentFinal, dayFourFinal: dayFourFinal, dayThreeFinal: dayThreeFinal, dayTwoFinal: dayTwoFinal, dayOneFinal: dayOneFinal, dayFourNumbers: dayFourNumbers, dayThreeNumbers: dayThreeNumbers, dayTwoNumbers: dayTwoNumbers, dayOneNumbers: dayOneNumbers, dayFourMinTemp: dayFourMinTemp, dayFourMaxTemp: dayFourMaxTemp, dayThreeMinTemp: dayThreeMinTemp, dayThreeMaxTemp: dayThreeMaxTemp, dayTwoMinTemp: dayTwoMinTemp, dayTwoMaxTemp: dayTwoMaxTemp, dayOneMinTemp: dayOneMinTemp, dayOneMaxTemp: dayOneMaxTemp, cityQuery: cityQuery, weatherDescription: weatherDescription, temp: temp, weatherConditionUrl: weatherConditionUrl, dayOne: dayOne, dayTwo: dayTwo, dayThree: dayThree, dayFour: dayFour, iconDayOne: iconDayOne, iconDayTwo: iconDayTwo, iconDayThree: iconDayThree, iconDayFour: iconDayFour });
             });
-          }else {
+          } else {
             res.send("There is a problem with the forecast data parsing");
           }
-
         });
       });
     } else if (response.statusCode == 404) {
+
       res.send("Please check the spelling of &nbsp;'" + cityQuery + "'");
+      cityQuery = "Ravenna";
     } else {
       res.send("Check the code");
     }

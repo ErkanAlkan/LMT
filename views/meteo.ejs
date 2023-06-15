@@ -1,40 +1,83 @@
 <%- include("header") -%>
-    <div class="container text-center marginTop ">
+    <div class="container text-center mt-5 ">
         <div class="col">
-            <h1><%= cityQuery %></h1>
+            <h1>
+                <%= cityQuery %>(<%=currentFinal%>)
+            </h1>
         </div>
         <div>
             <img src="<%=weatherConditionUrl%>" alt="" class="img-fluid rounded">
-            <img src="<%=weatherConditionUrl%>" alt="" class="img-fluid rounded">
         </div>
         <div>
-            <h2>The temperature in <%= cityQuery %> is "<%= temp %>" degrees Celcius</h2>
+            <h2>The temperature is <%= temp %> °C</h2>
         </div>
-        <div>
-            <form action="/cityQuery" method="post">
-                <input type="text" class="mt-3 text-center" placeholder="Search place" name="cityQuery">
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
-        </div>
+
     </div>
     <div class="container text-center">
-        <div class="row mt-5">
+        <div class="row marginTop">
             <div class="col">
-                <%= dayOne %>
+                <h5>
+                    <%= dayOne %>(<%=dayOneFinal%>)
+                </h5>
+                <div>
+                    <%= dayOneMinTemp %> °C
+                </div>
+                <div>
+                    <%= dayOneMaxTemp %> °C
+                </div>
+                <div>
+                    <img src="<%=iconDayOne%>" alt="" class="img-fluid rounded">
+                </div>
+            </div>
+
+            <div class="col">
+                <h5>
+                    <%= dayTwo %>(<%=dayTwoNumbers%>)
+                </h5>
+                <div>
+                    <%= dayTwoMinTemp %> °C
+                </div>
+                <div>
+                    <%= dayOneMaxTemp %> °C
+                </div>
+                <div>
+                    <img src="<%=iconDayTwo%>" alt="" class="img-fluid rounded">
+                </div>
             </div>
             <div class="col">
-                <%= dayTwo %>
+                <h5>
+                    <%= dayThree %>(<%=dayThreeNumbers%>)
+                </h5>
+                <div>
+                    <%= dayThreeMinTemp %> °C
+                </div>
+                <div>
+                    <%= dayThreeMaxTemp %> °C
+                </div>
+                <div>
+                    <img src="<%=iconDayThree%>" alt="" class="img-fluid rounded">
+                </div>
             </div>
             <div class="col">
-                <%= dayThree %>
-            </div>
-            <div class="col">
-                <%= dayFour %>
-            </div>
-            <div class="col">
-                <%= dayFive %>
+                <h5>
+                    <%= dayFour %>(<%=dayFourNumbers%>)
+                </h5>
+                <div>
+                    <%= dayFourMinTemp %> °C
+                </div>
+                <div>
+                    <%= dayFourMaxTemp %> °C
+                </div>
+                <div>
+                    <img src="<%=iconDayFour%>" alt="" class="img-fluid rounded">
+                </div>
             </div>
         </div>
     </div>
-
+    <div class="container text-center my-auto mx-auto">
+        <form action="/cityQuery" method="post">
+            <input type="text" class="mt-5 text-center" placeholder="Search place" name="cityQuery">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
     <%- include("footer") -%>

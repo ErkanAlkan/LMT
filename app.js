@@ -64,7 +64,9 @@ app.post("/additems", function (req, res) {
     console.log("Cannot add Items , please choose or Create a List");
     res.redirect("/Todolists");
   } else if (newItem === "") {
-    res.render("emptyitemlist");
+    List.find({}).select("name").then(function (allLists) {
+      res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+    });
   } else {
     List.findOne({ name: selectedListName }).then(function (foundList) {
       for (let i = 0; i < foundList.items.length; i++) {
@@ -146,7 +148,7 @@ app.post("/createNewList", function (req, res) {
         res.redirect("/Todolists");
       } else {
         List.find({}).select("name").then(function (allLists) {
-          res.render("sameitem", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          res.render("samelist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
         });
       }
     });

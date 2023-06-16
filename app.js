@@ -49,8 +49,14 @@ app.get("/Todolists", function (req, res) {
   });
   List.find({}).select("name").then(function (allLists) {
     List.findOne({ name: selectedListName }).then(function (foundList) {
-      selectedListItems = foundList.items;
-      selectedListCheckboxes = foundList.checkboxStatus;
+      if (foundList.items.length != 0) {
+        selectedListItems = foundList.items;
+        selectedListCheckboxes = foundList.checkboxStatus;
+      } else if (foundList.items.length === 0){
+        selectedListItems = [];
+        selectedListCheckboxes = [];
+      }
+      
       res.render("list", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
     });
   });
@@ -66,8 +72,13 @@ app.post("/additems", function (req, res) {
   } else if (newItem === "") {
     List.find({}).select("name").then(function (allLists) {
       List.findOne({ name: selectedListName }).then(function (foundList) {
-        selectedListItems = foundList.items;
-        selectedListCheckboxes = foundList.checkboxStatus;
+        if (foundList.items.length != 0) {
+          selectedListItems = foundList.items;
+          selectedListCheckboxes = foundList.checkboxStatus;
+        }else if (foundList.items.length === 0){
+          selectedListItems = [];
+          selectedListCheckboxes = [];
+        }
         res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
       });
     });
@@ -88,8 +99,10 @@ app.post("/additems", function (req, res) {
       } else {
         List.find({}).select("name").then(function (allLists) {
           List.findOne({ name: selectedListName }).then(function (foundList) {
-            selectedListItems = foundList.items;
-            selectedListCheckboxes = foundList.checkboxStatus;
+            if (foundList.items.length != 0) {
+              selectedListItems = foundList.items;
+              selectedListCheckboxes = foundList.checkboxStatus;
+            }
             res.render("sameitem", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
           });
         });
@@ -145,8 +158,10 @@ app.post("/createNewList", function (req, res) {
   if (newListName === "") {
     List.find({}).select("name").then(function (allLists) {
       List.findOne({ name: selectedListName }).then(function (foundList) {
-        selectedListItems = foundList.items;
-        selectedListCheckboxes = foundList.checkboxStatus;
+        if (foundList.items.length != 0) {
+          selectedListItems = foundList.items;
+          selectedListCheckboxes = foundList.checkboxStatus;
+        }
         res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
       });
     });

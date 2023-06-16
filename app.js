@@ -48,9 +48,9 @@ app.get("/Todolists", function (req, res) {
     }
   });
   List.find({}).select("name").then(function (allLists) {
-    List.findOne({name: selectedListName}).then(function (foundList){
-      selectedListItems=foundList.items;
-      selectedListCheckboxes=foundList.checkboxStatus;
+    List.findOne({ name: selectedListName }).then(function (foundList) {
+      selectedListItems = foundList.items;
+      selectedListCheckboxes = foundList.checkboxStatus;
       res.render("list", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
     });
   });
@@ -63,6 +63,8 @@ app.post("/additems", function (req, res) {
   if (selectedListName === "Please Choose or Create a List") {
     console.log("Cannot add Items , please choose or Create a List");
     res.redirect("/Todolists");
+  } else if (newItem === "") {
+    res.render("emptyItemList");
   } else {
     List.findOne({ name: selectedListName }).then(function (foundList) {
       for (let i = 0; i < foundList.items.length; i++) {
@@ -131,7 +133,7 @@ app.post("/deleteLists", function (req, res) {
 app.post("/createNewList", function (req, res) {
   const newListName = _.startCase(req.body.newListName);
   if (newListName === "") {
-    res.send("<h1>List name can't be empty!");
+    res.render("emptyItemList");
   } else {
     List.findOne({ name: newListName }).then(function (foundList) {
       if (!foundList) {
@@ -447,7 +449,7 @@ app.get("/Meteorology", function (req, res) {
       });
     } else if (response.statusCode === 404) {
 
-      res.render("wrongspelling", {cityQuery:cityQuery});
+      res.render("wrongspelling", { cityQuery: cityQuery });
       cityQuery = "Ravenna";
     } else {
       console.log(response.statusCode);
@@ -459,9 +461,9 @@ app.get("/Meteorology", function (req, res) {
 
 app.post("/cityQuery", function (req, res) {
   cityQuery = _.capitalize(req.body.cityQuery);
-  if (cityQuery === ""){
+  if (cityQuery === "") {
     res.render("emptycityquery");
-  }else{
+  } else {
     res.redirect("/Meteorology");
   }
 });

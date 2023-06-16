@@ -1,0 +1,16 @@
+<%- include("header") -%>
+
+<div class="container text-center mt-5">
+    <div class="col">
+        <h3>Please type a city name </h3>
+    </div>
+
+</div>
+<div class="container text-center marginBottom">
+    <form action="/cityQuery" method="post">
+        <input type="text" class="mt-5 text-center" placeholder="Search place" name="cityQuery">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+</div>
+
+<%- include("footer") -%>

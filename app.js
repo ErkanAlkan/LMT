@@ -9,7 +9,7 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"));
 
-mongoose.connect('mongodb://127.0.0.1:27017/todolistDB');
+mongoose.connect('mongodb+srv://erkanalkanmetu:AETSU2ZBzjjB3IbX@cluster1.jxaszwy.mongodb.net/?retryWrites=true&w=majority');
 
 const listSchema = new mongoose.Schema({
   name: String,
@@ -430,28 +430,36 @@ app.get("/Meteorology", function (req, res) {
               } catch (error) {
                 console.error("Error parsing JSON:", error);
               }
-              res.render("meteo", { currentFinal: currentFinal, dayFourFinal: dayFourFinal, dayThreeFinal: dayThreeFinal, dayTwoFinal: dayTwoFinal, dayOneFinal: dayOneFinal, dayFourMinTemp: dayFourMinTemp, dayFourMaxTemp: dayFourMaxTemp, dayThreeMinTemp: dayThreeMinTemp, dayThreeMaxTemp: dayThreeMaxTemp, dayTwoMinTemp: dayTwoMinTemp, dayTwoMaxTemp: dayTwoMaxTemp, dayOneMinTemp: dayOneMinTemp, dayOneMaxTemp: dayOneMaxTemp, cityQuery: cityQuery, weatherDescription: weatherDescription, temp: temp, weatherConditionUrl: weatherConditionUrl, dayOne: dayOne, dayTwo: dayTwo, dayThree: dayThree, dayFour: dayFour, iconDayOne: iconDayOne, iconDayTwo: iconDayTwo, iconDayThree: iconDayThree, iconDayFour: iconDayFour });
+              res.render("meteo", {
+                currentFinal: currentFinal, dayFourFinal: dayFourFinal, dayThreeFinal: dayThreeFinal, dayTwoFinal: dayTwoFinal, dayOneFinal: dayOneFinal, dayFourMinTemp: dayFourMinTemp, dayFourMaxTemp: dayFourMaxTemp,
+                dayThreeMinTemp: dayThreeMinTemp, dayThreeMaxTemp: dayThreeMaxTemp, dayTwoMinTemp: dayTwoMinTemp, dayTwoMaxTemp: dayTwoMaxTemp, dayOneMinTemp: dayOneMinTemp, dayOneMaxTemp: dayOneMaxTemp, cityQuery: cityQuery, weatherDescription: weatherDescription,
+                temp: temp, weatherConditionUrl: weatherConditionUrl, dayOne: dayOne, dayTwo: dayTwo, dayThree: dayThree, dayFour: dayFour, iconDayOne: iconDayOne, iconDayTwo: iconDayTwo, iconDayThree: iconDayThree, iconDayFour: iconDayFour
+              });
             });
           } else {
             res.send("There is a problem with the forecast data parsing");
           }
         });
       });
-    } else if (response.statusCode == 404) {
+    } else if (response.statusCode === 404) {
 
-      res.send("Please check the spelling of &nbsp;'" + cityQuery + "'");
+      res.render("wrongspelling", {cityQuery:cityQuery});
       cityQuery = "Ravenna";
     } else {
+      console.log(response.statusCode);
       res.send("Check the code");
     }
   });
-
 });
 
 
 app.post("/cityQuery", function (req, res) {
   cityQuery = _.capitalize(req.body.cityQuery);
-  res.redirect("/Meteorology");
+  if (cityQuery === ""){
+    res.render("emptycityquery");
+  }else{
+    res.redirect("/Meteorology");
+  }
 });
 
 app.listen(3000, function () {

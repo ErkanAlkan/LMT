@@ -64,7 +64,7 @@ app.post("/additems", function (req, res) {
     console.log("Cannot add Items , please choose or Create a List");
     res.redirect("/Todolists");
   } else if (newItem === "") {
-    res.render("emptyItemList");
+    res.render("emptyitemlist");
   } else {
     List.findOne({ name: selectedListName }).then(function (foundList) {
       for (let i = 0; i < foundList.items.length; i++) {
@@ -133,7 +133,7 @@ app.post("/deleteLists", function (req, res) {
 app.post("/createNewList", function (req, res) {
   const newListName = _.startCase(req.body.newListName);
   if (newListName === "") {
-    res.render("emptyItemList");
+    res.render("emptyitemlist");
   } else {
     List.findOne({ name: newListName }).then(function (foundList) {
       if (!foundList) {

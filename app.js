@@ -65,7 +65,11 @@ app.post("/additems", function (req, res) {
     res.redirect("/Todolists");
   } else if (newItem === "") {
     List.find({}).select("name").then(function (allLists) {
-      res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+      List.findOne({ name: selectedListName }).then(function (foundList) {
+        selectedListItems = foundList.items;
+        selectedListCheckboxes = foundList.checkboxStatus;
+        res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+      });
     });
   } else {
     List.findOne({ name: selectedListName }).then(function (foundList) {
@@ -83,7 +87,11 @@ app.post("/additems", function (req, res) {
         res.redirect("/Todolists");
       } else {
         List.find({}).select("name").then(function (allLists) {
-          res.render("sameitem", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          List.findOne({ name: selectedListName }).then(function (foundList) {
+            selectedListItems = foundList.items;
+            selectedListCheckboxes = foundList.checkboxStatus;
+            res.render("sameitem", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          });
         });
       }
     });
@@ -136,7 +144,11 @@ app.post("/createNewList", function (req, res) {
   const newListName = _.startCase(req.body.newListName);
   if (newListName === "") {
     List.find({}).select("name").then(function (allLists) {
-      res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+      List.findOne({ name: selectedListName }).then(function (foundList) {
+        selectedListItems = foundList.items;
+        selectedListCheckboxes = foundList.checkboxStatus;
+        res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+      });
     });
   } else {
     List.findOne({ name: newListName }).then(function (foundList) {

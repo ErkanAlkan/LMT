@@ -135,7 +135,9 @@ app.post("/deleteLists", function (req, res) {
 app.post("/createNewList", function (req, res) {
   const newListName = _.startCase(req.body.newListName);
   if (newListName === "") {
-    res.render("emptyitemlist");
+    List.find({}).select("name").then(function (allLists) {
+      res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+    });
   } else {
     List.findOne({ name: newListName }).then(function (foundList) {
       if (!foundList) {

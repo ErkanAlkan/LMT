@@ -49,13 +49,16 @@ app.get("/Todolists", function (req, res) {
   });
   List.find({}).select("name").then(function (allLists) {
     List.findOne({ name: selectedListName }).then(function (foundList) {
-      if (foundList.items.length != 0) {
-        selectedListItems = foundList.items;
-        selectedListCheckboxes = foundList.checkboxStatus;
-      } else if (foundList.items.length === 0){
+      if (!foundList) {
+        if (foundList.items.length != 0) {
+          selectedListItems = foundList.items;
+          selectedListCheckboxes = foundList.checkboxStatus;
+        } 
+      }else{
         selectedListItems = [];
         selectedListCheckboxes = [];
       }
+      
       
       res.render("list", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
     });

@@ -49,17 +49,8 @@ app.get("/Todolists", function (req, res) {
   });
   List.find({}).select("name").then(function (allLists) {
     List.findOne({ name: selectedListName }).then(function (foundList) {
-      if (!foundList) {
-        if (foundList.items.length != 0) {
-          selectedListItems = foundList.items;
-          selectedListCheckboxes = foundList.checkboxStatus;
-        } 
-      }else{
-        selectedListItems = [];
-        selectedListCheckboxes = [];
-      }
-      
-      
+      selectedListItems = foundList.items;
+      selectedListCheckboxes = foundList.checkboxStatus;
       res.render("list", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
     });
   });
@@ -75,13 +66,8 @@ app.post("/additems", function (req, res) {
   } else if (newItem === "") {
     List.find({}).select("name").then(function (allLists) {
       List.findOne({ name: selectedListName }).then(function (foundList) {
-        if (foundList.items.length != 0) {
-          selectedListItems = foundList.items;
-          selectedListCheckboxes = foundList.checkboxStatus;
-        }else if (foundList.items.length === 0){
-          selectedListItems = [];
-          selectedListCheckboxes = [];
-        }
+        selectedListItems = foundList.items;
+        selectedListCheckboxes = foundList.checkboxStatus;
         res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
       });
     });
@@ -102,10 +88,8 @@ app.post("/additems", function (req, res) {
       } else {
         List.find({}).select("name").then(function (allLists) {
           List.findOne({ name: selectedListName }).then(function (foundList) {
-            if (foundList.items.length != 0) {
-              selectedListItems = foundList.items;
-              selectedListCheckboxes = foundList.checkboxStatus;
-            }
+            selectedListItems = foundList.items;
+            selectedListCheckboxes = foundList.checkboxStatus;
             res.render("sameitem", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
           });
         });
@@ -161,10 +145,8 @@ app.post("/createNewList", function (req, res) {
   if (newListName === "") {
     List.find({}).select("name").then(function (allLists) {
       List.findOne({ name: selectedListName }).then(function (foundList) {
-        if (foundList.items.length != 0) {
-          selectedListItems = foundList.items;
-          selectedListCheckboxes = foundList.checkboxStatus;
-        }
+        selectedListItems = foundList.items;
+        selectedListCheckboxes = foundList.checkboxStatus;
         res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
       });
     });
@@ -226,10 +208,6 @@ app.get("/Meteorology", function (req, res) {
         weatherDescription = weatherData.weather[0].description;
         icon = weatherData.weather[0].icon;
         weatherConditionUrl = "https://openweathermap.org/img/wn/" + icon + "@2x.png"
-        // res.write("<p>The weather is currently " + weatherDescription + "</p>");
-        // res.write("<h2>The temperature in " + query + " is " + temp + " degrees Celcius</h2>");
-        // res.write("<img src=" + weatherConditionUrl + ">");
-        // res.send();
 
         https.get(urlForecast, function (response) {
 

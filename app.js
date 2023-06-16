@@ -48,7 +48,11 @@ app.get("/Todolists", function (req, res) {
     }
   });
   List.find({}).select("name").then(function (allLists) {
-    res.render("list", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+    List.findOne({name: selectedListName}).then(function (foundList){
+      selectedListItems=foundList.items;
+      selectedListCheckboxes=foundList.checkboxStatus;
+      res.render("list", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+    });
   });
 });
 

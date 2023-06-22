@@ -85,7 +85,7 @@ app.post("/additems", function (req, res) {
       console.log(selectedListName);
       List.findOne({ name: selectedListName }).then(function (foundList) {
         if (!foundList) {
-          res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          res.redirect("/Todolists");
         } else {
           selectedListItems = foundList.items;
           selectedListCheckboxes = foundList.checkboxStatus;

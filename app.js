@@ -11,6 +11,13 @@ app.use(express.static("public"));
 
 mongoose.connect('mongodb+srv://erkanalkanmetu:AETSU2ZBzjjB3IbX@cluster1.jxaszwy.mongodb.net/?retryWrites=true&w=majority');
 
+const selectedListNameSchema = new mongoose.Schema({
+  name: String,
+  value: String
+});
+
+const SelectedListName = mongoose.model("SelectedListName", selectedListNameSchema);
+
 const listSchema = new mongoose.Schema({
   name: String,
   items: [],
@@ -19,12 +26,7 @@ const listSchema = new mongoose.Schema({
 
 const List = mongoose.model("List", listSchema);
 
-const selectedListNameSchema = new mongoose.Schema({
-  name: String,
-  value: String
-});
 
-const SelectedListName = new mongoose.model("SelectedListName", selectedListNameSchema);
 
 SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
   if (!foundObject) {
@@ -43,6 +45,8 @@ var selectedListName;
 var selectedListItems;
 var selectedListCheckboxes;
 var cityQuery = "Ravenna";
+var newItem;
+var newListName;
 
 //localhost - webhost switch constants
 
@@ -70,12 +74,15 @@ app.get("/Todolists", function (req, res) {
       });
       list.save();
       SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+        console.log("tryoutvalue ", foundObject);
         foundObject.value = initialList;
+        foundObject.save();
+        selectedListItems = [];
+        selectedListCheckboxes = [];
+        res.redirect("/Todolists");
       });
-      foundObject.save();
-      selectedListItems = [];
-      selectedListCheckboxes = [];
-      res.redirect("/Todolists");
+
+
     }
   });
   List.find({}).select("name").then(function (allLists) {
@@ -91,14 +98,14 @@ app.get("/Todolists", function (req, res) {
           if (selectedListName === "Please Choose or Create a List") {
             selectedListItems = [];
             selectedListCheckboxes = [];
-            res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+            res.render("list", { newListName: newListName, newItem: newItem, phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
           } else {
             console.log("nothing has been found, smth is wrong, check the code");
           }
         } else {
           selectedListItems = foundList.items;
           selectedListCheckboxes = foundList.checkboxStatus;
-          res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          res.render("list", { newListName: newListName, newItem: newItem, phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
         }
       });
     })
@@ -106,7 +113,7 @@ app.get("/Todolists", function (req, res) {
 });
 
 app.post("/additems", function (req, res) {
-  const newItem = _.capitalize(req.body.userInput);
+  newItem = _.capitalize(req.body.userInput);
   var sameItem = "false";
   SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
     selectedListName = foundObject.value;
@@ -123,7 +130,7 @@ app.post("/additems", function (req, res) {
           } else {
             selectedListItems = foundList.items;
             selectedListCheckboxes = foundList.checkboxStatus;
-            res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+            res.render("emptyitemlist", { newListName: newListName, newItem: newItem, phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
           }
         });
       });
@@ -146,7 +153,7 @@ app.post("/additems", function (req, res) {
             List.findOne({ name: selectedListName }).then(function (foundList) {
               selectedListItems = foundList.items;
               selectedListCheckboxes = foundList.checkboxStatus;
-              res.render("sameitem", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+              res.render("sameitem", { newListName: newListName, newItem: newItem, phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
             });
           });
         }
@@ -201,7 +208,7 @@ app.post("/deleteLists", function (req, res) {
 
 
 app.post("/createNewList", function (req, res) {
-  const newListName = _.startCase(req.body.newListName);
+  newListName = _.startCase(req.body.newListName);
   if (newListName === "") {
     List.find({}).select("name").then(function (allLists) {
       SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
@@ -211,11 +218,11 @@ app.post("/createNewList", function (req, res) {
         if (selectedListName === "Please Choose or Create a List") {
           selectedListItems = [];
           selectedListCheckboxes = [];
-          res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          res.render("emptyitemlist", { newListName: newListName, newItem: newItem, phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
         } else {
           selectedListItems = foundList.items;
           selectedListCheckboxes = foundList.checkboxStatus;
-          res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          res.render("emptyitemlist", { newListName: newListName, newItem: newItem, phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
         }
       });
     });
@@ -233,7 +240,7 @@ app.post("/createNewList", function (req, res) {
         List.find({}).select("name").then(function (allLists) {
           SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
             selectedListName = foundObject.value;
-            res.render("samelist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+            res.render("samelist", { newListName: newListName, newItem: newItem, phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
           });
         });
       }

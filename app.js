@@ -21,9 +21,9 @@ const List = mongoose.model("List", listSchema);
 
 
 const initialList = "Quick List"
-var selectedListName = String;
-var selectedListItems = Array;
-var selectedListCheckboxes = Array;
+var selectedListName;
+var selectedListItems;
+var selectedListCheckboxes;
 var cityQuery = "Ravenna";
 
 //localhost - webhost switch constants

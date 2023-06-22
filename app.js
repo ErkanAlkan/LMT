@@ -19,6 +19,24 @@ const listSchema = new mongoose.Schema({
 
 const List = mongoose.model("List", listSchema);
 
+const selectedListNameSchema = new mongoose.Schema({
+  name: String,
+  value: String
+});
+
+const SelectedListName = mongoose.model("SelectedListName", selectedListNameSchema);
+
+SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+  if (!foundObject) {
+    const selectedName = new SelectedListName({
+      name: "selectedListNameDB",
+      value: ""
+    });
+    selectedName.save();
+  }
+});
+
+
 
 const initialList = "Quick List"
 var selectedListName;
@@ -50,87 +68,98 @@ app.get("/Todolists", function (req, res) {
         checkboxStatus: []
       });
       list.save();
-      selectedListName = initialList;
+      SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+        foundObject.value = initialList;
+      });
+      foundObject.save();
       selectedListItems = [];
       selectedListCheckboxes = [];
       res.redirect("/Todolists");
     }
   });
   List.find({}).select("name").then(function (allLists) {
-    if (selectedListName === "") {
-      selectedListName = allLists[0].name;
-    }
-    List.findOne({ name: selectedListName }).then(function (foundList) {
-      if (!foundList) {
-        console.log("nothing has been found, smth is wrong");
-        selectedListName = initialList;
-        res.redirect("/Todolists");
-      } else {
-        selectedListItems = foundList.items;
-        selectedListCheckboxes = foundList.checkboxStatus;
-        res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+    SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+      selectedListName = foundObject.value;
+      if (foundObject.value === "") {
+        foundObject.value = allLists[0].name;
+        selectedListName = foundObject.value;
       }
-    });
+      foundObject.save();
+      List.findOne({ name: selectedListName }).then(function (foundList) {
+        if (!foundList) {
+          console.log("nothing has been found, smth is wrong");
+          res.redirect("/Todolists");
+        } else {
+          selectedListItems = foundList.items;
+          selectedListCheckboxes = foundList.checkboxStatus;
+          res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+        }
+      });
+    })
+
   });
 });
 
 app.post("/additems", function (req, res) {
   const newItem = _.capitalize(req.body.userInput);
   var sameItem = "false";
-
-  if (selectedListName === "Please Choose or Create a List") {
-    console.log("Cannot add Items , please choose or Create a List");
-    res.redirect("/Todolists");
-  } else if (selectedListName === "") {
-    console.log("selectedListName is empty");
-  } else if (newItem === "") {
-    List.find({}).select("name").then(function (allLists) {
-      List.findOne({ name: selectedListName }).then(function (foundList) {
-        if (!foundList) {
-          res.redirect("/Todolists");
-        } else {
-          selectedListItems = foundList.items;
-          selectedListCheckboxes = foundList.checkboxStatus;
-          res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
-        }
-      });
-    });
-  } else {
-    List.findOne({ name: selectedListName }).then(function (foundList) {
-      console.log("selectedlistname ", selectedListName);
-      for (let i = 0; i < foundList.items.length; i++) {
-        if (newItem === foundList.items[i]) {
-          sameItem = "true"
-        }
-      }
-      if (sameItem === "false") {
-        foundList.items.push(newItem);
-        foundList.checkboxStatus.push("notChecked");
-        foundList.save();
-        selectedListItems = foundList.items;
-        selectedListCheckboxes = foundList.checkboxStatus;
-        res.redirect("/Todolists");
-      } else {
-        List.find({}).select("name").then(function (allLists) {
-          List.findOne({ name: selectedListName }).then(function (foundList) {
+  SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+    selectedListName = foundObject.value;
+    if (selectedListName === "Please Choose or Create a List") {
+      console.log("Cannot add Items , please choose or Create a List");
+      res.redirect("/Todolists");
+    } else if (selectedListName === "") {
+      console.log("selectedListName is empty");
+    } else if (newItem === "") {
+      List.find({}).select("name").then(function (allLists) {
+        List.findOne({ name: selectedListName }).then(function (foundList) {
+          if (!foundList) {
+            res.redirect("/Todolists");
+          } else {
             selectedListItems = foundList.items;
             selectedListCheckboxes = foundList.checkboxStatus;
-            res.render("sameitem", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
-          });
+            res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          }
         });
-      }
-    });
-  }
+      });
+    } else {
+      List.findOne({ name: foundObject.value }).then(function (foundList) {
+        for (let i = 0; i < foundList.items.length; i++) {
+          if (newItem === foundList.items[i]) {
+            sameItem = "true"
+          }
+        }
+        if (sameItem === "false") {
+          foundList.items.push(newItem);
+          foundList.checkboxStatus.push("notChecked");
+          foundList.save();
+          selectedListItems = foundList.items;
+          selectedListCheckboxes = foundList.checkboxStatus;
+          res.redirect("/Todolists");
+        } else {
+          List.find({}).select("name").then(function (allLists) {
+            List.findOne({ name: foundObject.value }).then(function (foundList) {
+              selectedListItems = foundList.items;
+              selectedListCheckboxes = foundList.checkboxStatus;
+              res.render("sameitem", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+            });
+          });
+        }
+      });
+    }
+  });
+
 });
 
 app.post("/deleteItems", function (req, res) {
   const deleteItems = req.body.deleteItems;
-  List.findOne({ name: selectedListName }).then(function (foundList) {
-    foundList.items.splice(deleteItems, 1);
-    foundList.checkboxStatus.splice(deleteItems, 1);
-    foundList.save();
-    selectedListItems = foundList.items;
-    selectedListCheckboxes = foundList.checkboxStatus;
+  SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+    selectedListName = foundObject.value;
+    List.findOne({ name: selectedListName }).then(function (foundList) {
+      foundList.items.splice(deleteItems, 1);
+      foundList.checkboxStatus.splice(deleteItems, 1);
+      foundList.save();
+    });
   });
   res.redirect("/Todolists");
 });
@@ -201,6 +230,10 @@ app.post("/createNewList", function (req, res) {
 
 app.post("/selectingList", function (req, res) {
   selectedListName = req.body.selectedListNameButton;
+  SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+    foundObject.value = selectedListName;
+    foundObject.save();
+  });
   List.findOne({ name: selectedListName }).then(function (foundList) {
     if (!foundList) {
       List.findOne({ name: initialList }).then(function (firstList) {

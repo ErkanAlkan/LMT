@@ -21,9 +21,9 @@ const List = mongoose.model("List", listSchema);
 
 
 const initialList = "Quick List"
-var selectedListName = "";
-var selectedListItems = [];
-var selectedListCheckboxes = [];
+var selectedListName;
+var selectedListItems;
+var selectedListCheckboxes;
 var cityQuery = "Ravenna";
 
 //localhost - webhost switch constants
@@ -59,7 +59,6 @@ app.get("/Todolists", function (req, res) {
   List.find({}).select("name").then(function (allLists) {
     if (selectedListName === "") {
       selectedListName = allLists[0].name;
-      console.log(selectedListName);
     }
     List.findOne({ name: selectedListName }).then(function (foundList) {
       if (!foundList) {
@@ -76,15 +75,15 @@ app.get("/Todolists", function (req, res) {
 
 app.post("/additems", function (req, res) {
   const newItem = _.capitalize(req.body.userInput);
-  console.log(newItem);
   var sameItem = "false";
 
   if (selectedListName === "Please Choose or Create a List") {
     console.log("Cannot add Items , please choose or Create a List");
     res.redirect("/Todolists");
+  } else if (selectedListName === "") {
+    console.log("selectedListName is empty");
   } else if (newItem === "") {
     List.find({}).select("name").then(function (allLists) {
-      console.log(selectedListName);
       List.findOne({ name: selectedListName }).then(function (foundList) {
         if (!foundList) {
           res.redirect("/Todolists");

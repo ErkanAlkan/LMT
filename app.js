@@ -80,15 +80,20 @@ app.get("/Todolists", function (req, res) {
   List.find({}).select("name").then(function (allLists) {
     SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
       selectedListName = foundObject.value;
-      if (foundObject.value === "") {
+      if (selectedListName === "") {
         foundObject.value = allLists[0].name;
         selectedListName = foundObject.value;
+        foundObject.save();
       }
-      foundObject.save();
       List.findOne({ name: selectedListName }).then(function (foundList) {
         if (!foundList) {
-          console.log("nothing has been found, smth is wrong");
-          res.redirect("/Todolists");
+          if (selectedListName === "Please Choose or Create a List") {
+            selectedListItems = [];
+            selectedListCheckboxes = [];
+            res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          } else {
+            console.log("nothing has been found, smth is wrong, check the code");
+          }
         } else {
           selectedListItems = foundList.items;
           selectedListCheckboxes = foundList.checkboxStatus;
@@ -96,7 +101,6 @@ app.get("/Todolists", function (req, res) {
         }
       });
     })
-
   });
 });
 
@@ -123,7 +127,7 @@ app.post("/additems", function (req, res) {
         });
       });
     } else {
-      List.findOne({ name: foundObject.value }).then(function (foundList) {
+      List.findOne({ name: selectedListName }).then(function (foundList) {
         for (let i = 0; i < foundList.items.length; i++) {
           if (newItem === foundList.items[i]) {
             sameItem = "true"
@@ -138,7 +142,7 @@ app.post("/additems", function (req, res) {
           res.redirect("/Todolists");
         } else {
           List.find({}).select("name").then(function (allLists) {
-            List.findOne({ name: foundObject.value }).then(function (foundList) {
+            List.findOne({ name: selectedListName }).then(function (foundList) {
               selectedListItems = foundList.items;
               selectedListCheckboxes = foundList.checkboxStatus;
               res.render("sameitem", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
@@ -148,7 +152,6 @@ app.post("/additems", function (req, res) {
       });
     }
   });
-
 });
 
 app.post("/deleteItems", function (req, res) {
@@ -166,28 +169,29 @@ app.post("/deleteItems", function (req, res) {
 
 app.post("/checkboxClick", function (req, res) {
   var clickedBox = req.body.checkboxStatus;
-  List.findOne({ name: selectedListName }).then(function (foundList) {
-    if (foundList.checkboxStatus[clickedBox] === "notChecked") {
-      foundList.checkboxStatus[clickedBox] = "checked"
-      foundList.save();
-      selectedListCheckboxes = foundList.checkboxStatus;
-    } else {
-      foundList.checkboxStatus[clickedBox] = "notChecked"
-      foundList.save();
-      selectedListCheckboxes = foundList.checkboxStatus;
-    }
+  SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+    selectedListName = foundObject.value;
+    List.findOne({ name: selectedListName }).then(function (foundList) {
+      if (foundList.checkboxStatus[clickedBox] === "notChecked") {
+        foundList.checkboxStatus[clickedBox] = "checked"
+        foundList.save();
+      } else {
+        foundList.checkboxStatus[clickedBox] = "notChecked"
+        foundList.save();
+      }
+    });
   });
   res.redirect("/Todolists");
 });
 
 app.post("/deleteLists", function (req, res) {
-
   const deleteLists = req.body.deleteLists;
-  if (deleteLists === selectedListName) {
-    selectedListName = "Please Choose or Create a List"
-    selectedListItems = [];
-    selectedListCheckboxes = [];
-  };
+  SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+    if (deleteLists === foundObject.value) {
+      foundObject.value = "Please Choose or Create a List"
+      foundObject.save();
+    };
+  });
   List.findOneAndDelete({ name: deleteLists }).then(function () {
 
   });
@@ -199,8 +203,13 @@ app.post("/createNewList", function (req, res) {
   const newListName = _.startCase(req.body.newListName);
   if (newListName === "") {
     List.find({}).select("name").then(function (allLists) {
+      SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+        selectedListName = foundObject.value;
+      });
       List.findOne({ name: selectedListName }).then(function (foundList) {
         if (selectedListName === "Please Choose or Create a List") {
+          selectedListItems = [];
+          selectedListCheckboxes = [];
           res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
         } else {
           selectedListItems = foundList.items;
@@ -221,7 +230,10 @@ app.post("/createNewList", function (req, res) {
         res.redirect("/Todolists");
       } else {
         List.find({}).select("name").then(function (allLists) {
-          res.render("samelist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+            selectedListName = foundObject.value;
+            res.render("samelist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          });
         });
       }
     });

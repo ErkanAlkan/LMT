@@ -30,7 +30,7 @@ var cityQuery = "Ravenna";
 
 const phome = "https://weak-rose-viper-sari.cyclic.app/"
 const ptoDoList = phome + "Todolists"
-const pmeteo =  phome + "Meteorology"
+const pmeteo = phome + "Meteorology"
 const ptravelPlans = phome + "Travel%20Plans"
 
 
@@ -82,10 +82,15 @@ app.post("/additems", function (req, res) {
     res.redirect("/Todolists");
   } else if (newItem === "") {
     List.find({}).select("name").then(function (allLists) {
+      console.log(selectedListName);
       List.findOne({ name: selectedListName }).then(function (foundList) {
-        selectedListItems = foundList.items;
-        selectedListCheckboxes = foundList.checkboxStatus;
-        res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+        if (!foundList) {
+          res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+        } else {
+          selectedListItems = foundList.items;
+          selectedListCheckboxes = foundList.checkboxStatus;
+          res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+        }
       });
     });
   } else {

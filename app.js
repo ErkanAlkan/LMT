@@ -26,15 +26,7 @@ const selectedListNameSchema = new mongoose.Schema({
 
 const SelectedListName = mongoose.model("SelectedListName", selectedListNameSchema);
 
-SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
-  if (!foundObject) {
-    const selectedName = new SelectedListName({
-      name: "selectedListNameDB",
-      value: ""
-    });
-    selectedName.save();
-  }
-});
+
 
 
 
@@ -60,6 +52,15 @@ app.get("/", function (req, res) {
 
 //TO DO List section
 app.get("/Todolists", function (req, res) {
+  SelectedListName.findOne({ name: "selectedListNameDB" }).then(function (foundObject) {
+    if (!foundObject) {
+      const selectedName = new SelectedListName({
+        name: "selectedListNameDB",
+        value: ""
+      });
+      selectedName.save();
+    }
+  });
   List.find({}).select("_id").then(function (exist) {
     if (exist.length === 0) {
       const list = new List({

@@ -53,11 +53,13 @@ app.get("/Todolists", function (req, res) {
       selectedListName = initialList;
       selectedListItems = [];
       selectedListCheckboxes = [];
+      res.redirect("/Todolists");
     }
   });
   List.find({}).select("name").then(function (allLists) {
     if (selectedListName === "") {
       selectedListName = allLists[0].name;
+      console.log(selectedListName);
     }
     List.findOne({ name: selectedListName }).then(function (foundList) {
       if (!foundList) {

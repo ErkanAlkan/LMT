@@ -21,7 +21,7 @@ const List = mongoose.model("List", listSchema);
 
 
 const initialList = "Quick List"
-var selectedListName = initialList;
+var selectedListName = "";
 var selectedListItems = [];
 var selectedListCheckboxes = [];
 var cityQuery = "Ravenna";
@@ -29,9 +29,9 @@ var cityQuery = "Ravenna";
 //localhost - webhost switch constants
 
 const phome = "https://weak-rose-viper-sari.cyclic.app/"
-const ptoDoList = "https://weak-rose-viper-sari.cyclic.app/Todolists"
-const pmeteo = "https://weak-rose-viper-sari.cyclic.app/Meteorology"
-const ptravelPlans = "https://weak-rose-viper-sari.cyclic.app/Travel%20Plans"
+const ptoDoList = phome + "Todolists"
+const pmeteo =  phome + "Meteorology"
+const ptravelPlans = phome + "Travel%20Plans"
 
 
 
@@ -56,8 +56,10 @@ app.get("/Todolists", function (req, res) {
     }
   });
   List.find({}).select("name").then(function (allLists) {
+    if (selectedListName === "") {
+      selectedListName = allLists[0].name;
+    }
     List.findOne({ name: selectedListName }).then(function (foundList) {
-
       if (!foundList) {
         console.log("nothing has been found, smth is wrong");
         res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });

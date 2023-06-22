@@ -97,6 +97,7 @@ app.post("/additems", function (req, res) {
     });
   } else {
     List.findOne({ name: selectedListName }).then(function (foundList) {
+      console.log("selectedlistname " , selectedListName);
       for (let i = 0; i < foundList.items.length; i++) {
         if (newItem === foundList.items[i]) {
           sameItem = "true"

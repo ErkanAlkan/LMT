@@ -63,6 +63,7 @@ app.get("/Todolists", function (req, res) {
     List.findOne({ name: selectedListName }).then(function (foundList) {
       if (!foundList) {
         console.log("nothing has been found, smth is wrong");
+        selectedListName = initialList;
         res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
       } else {
         selectedListItems = foundList.items;

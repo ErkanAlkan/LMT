@@ -26,13 +26,21 @@ var selectedListItems = [];
 var selectedListCheckboxes = [];
 var cityQuery = "Ravenna";
 
+//localhost - webhost switch constants
+
+const phome = "https://weak-rose-viper-sari.cyclic.app/"
+const ptoDoList = "https://weak-rose-viper-sari.cyclic.app/Todolists"
+const pmeteo = "https://weak-rose-viper-sari.cyclic.app/Meteorology"
+const ptravelPlans = "https://weak-rose-viper-sari.cyclic.app/Travel%20Plans"
 
 
+
+//home page
 app.get("/", function (req, res) {
-  res.render("home");
+  res.render("home", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans });
 });
 
-//TO DO List section//
+//TO DO List section
 app.get("/Todolists", function (req, res) {
   List.find({}).select("_id").then(function (exist) {
     if (exist.length === 0) {
@@ -49,19 +57,22 @@ app.get("/Todolists", function (req, res) {
   });
   List.find({}).select("name").then(function (allLists) {
     List.findOne({ name: selectedListName }).then(function (foundList) {
+
       if (!foundList) {
-        res.render("list", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+        console.log("nothing has been found, smth is wrong");
+        res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
       } else {
         selectedListItems = foundList.items;
         selectedListCheckboxes = foundList.checkboxStatus;
-        res.render("list", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+        res.render("list", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
       }
     });
   });
 });
 
 app.post("/additems", function (req, res) {
-  const newItem = _.capitalize(req.body.newItem);
+  const newItem = _.capitalize(req.body.userInput);
+  console.log(newItem);
   var sameItem = "false";
 
   if (selectedListName === "Please Choose or Create a List") {
@@ -72,7 +83,7 @@ app.post("/additems", function (req, res) {
       List.findOne({ name: selectedListName }).then(function (foundList) {
         selectedListItems = foundList.items;
         selectedListCheckboxes = foundList.checkboxStatus;
-        res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+        res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
       });
     });
   } else {
@@ -94,7 +105,7 @@ app.post("/additems", function (req, res) {
           List.findOne({ name: selectedListName }).then(function (foundList) {
             selectedListItems = foundList.items;
             selectedListCheckboxes = foundList.checkboxStatus;
-            res.render("sameitem", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+            res.render("sameitem", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
           });
         });
       }
@@ -131,6 +142,7 @@ app.post("/checkboxClick", function (req, res) {
 });
 
 app.post("/deleteLists", function (req, res) {
+
   const deleteLists = req.body.deleteLists;
   if (deleteLists === selectedListName) {
     selectedListName = "Please Choose or Create a List"
@@ -149,9 +161,13 @@ app.post("/createNewList", function (req, res) {
   if (newListName === "") {
     List.find({}).select("name").then(function (allLists) {
       List.findOne({ name: selectedListName }).then(function (foundList) {
-        selectedListItems = foundList.items;
-        selectedListCheckboxes = foundList.checkboxStatus;
-        res.render("emptyitemlist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+        if (selectedListName === "Please Choose or Create a List") {
+          res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+        } else {
+          selectedListItems = foundList.items;
+          selectedListCheckboxes = foundList.checkboxStatus;
+          res.render("emptyitemlist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+        }
       });
     });
   } else {
@@ -166,7 +182,7 @@ app.post("/createNewList", function (req, res) {
         res.redirect("/Todolists");
       } else {
         List.find({}).select("name").then(function (allLists) {
-          res.render("samelist", { allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
+          res.render("samelist", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, allLists: allLists, selectedListName: selectedListName, selectedListItems: selectedListItems, selectedListCheckboxes: selectedListCheckboxes });
         });
       }
     });
@@ -341,7 +357,7 @@ app.get("/Meteorology", function (req, res) {
                 const sundayMaxTemp = Math.max(...sundayTemp).toFixed(1);
                 const sundayMinTemp = Math.min(...sundayTemp).toFixed(1);
 
-                //setting min and max temps for following 4 days
+                //setting min and max temperatures for the following 4 days
                 var dayOne
                 var dayTwo
                 var dayThree
@@ -453,7 +469,7 @@ app.get("/Meteorology", function (req, res) {
                 console.error("Error parsing JSON:", error);
               }
               res.render("meteo", {
-                currentFinal: currentFinal, dayFourFinal: dayFourFinal, dayThreeFinal: dayThreeFinal, dayTwoFinal: dayTwoFinal, dayOneFinal: dayOneFinal, dayFourMinTemp: dayFourMinTemp, dayFourMaxTemp: dayFourMaxTemp,
+                phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, currentFinal: currentFinal, dayFourFinal: dayFourFinal, dayThreeFinal: dayThreeFinal, dayTwoFinal: dayTwoFinal, dayOneFinal: dayOneFinal, dayFourMinTemp: dayFourMinTemp, dayFourMaxTemp: dayFourMaxTemp,
                 dayThreeMinTemp: dayThreeMinTemp, dayThreeMaxTemp: dayThreeMaxTemp, dayTwoMinTemp: dayTwoMinTemp, dayTwoMaxTemp: dayTwoMaxTemp, dayOneMinTemp: dayOneMinTemp, dayOneMaxTemp: dayOneMaxTemp, cityQuery: cityQuery, weatherDescription: weatherDescription,
                 temp: temp, weatherConditionUrl: weatherConditionUrl, dayOne: dayOne, dayTwo: dayTwo, dayThree: dayThree, dayFour: dayFour, iconDayOne: iconDayOne, iconDayTwo: iconDayTwo, iconDayThree: iconDayThree, iconDayFour: iconDayFour
               });
@@ -465,7 +481,7 @@ app.get("/Meteorology", function (req, res) {
       });
     } else if (response.statusCode === 404) {
 
-      res.render("wrongspelling", { cityQuery: cityQuery });
+      res.render("wrongspelling", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, cityQuery: cityQuery });
       cityQuery = "Ravenna";
     } else {
       console.log(response.statusCode);
@@ -478,10 +494,16 @@ app.get("/Meteorology", function (req, res) {
 app.post("/cityQuery", function (req, res) {
   cityQuery = _.capitalize(req.body.cityQuery);
   if (cityQuery === "") {
-    res.render("emptycityquery");
+    res.render("emptycityquery", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans, });
   } else {
     res.redirect("/Meteorology");
   }
+});
+
+//Travel Plans Section
+
+app.get("/Travel%20Plans", function (req, res) {
+  res.render("travel", { phome: phome, ptoDoList: ptoDoList, pmeteo: pmeteo, ptravelPlans: ptravelPlans });
 });
 
 app.listen(3000, function () {
